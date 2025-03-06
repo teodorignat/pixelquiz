@@ -1,6 +1,10 @@
 // Variables
 
 const gameContainer = document.getElementById('game-container');
+const audio1 = document.getElementById('song1'); 
+const audio2 = document.getElementById('song2'); 
+const audio3 = document.getElementById('song3'); 
+
 
 // State
 const state = {
@@ -22,10 +26,12 @@ function loadStart() {
             </div>`;
 
     div.querySelector('.start-btn').addEventListener('click', () => {
+        playBgSong('song1');
+        playSound('effect');
         loadUI();
         loadMenu();
     })
-
+    
     return gameContainer.appendChild(div);
 }
 
@@ -62,12 +68,16 @@ function loadMenu() {
                 <button class="btn shop-btn pixel-corners ">Shop</button>
             </div>`;
 
+
     div.querySelector('.play-btn').addEventListener('click', () => {
         playGame(state.difficulty.toLowerCase());
+        stopSound('song1');
+        playBgSong('song2');
     });
 
     div.querySelector('.diff-btn').addEventListener('click', loadDifficulties);
 
+    addHoverSound(div);
     clearUI('menu');
 
     return gameContainer.appendChild(div);
@@ -101,6 +111,7 @@ function loadDifficulties() {
     })
 
     clearUI('menu');
+    addHoverSound(div);
 
     return gameContainer.appendChild(div);
 }
@@ -127,7 +138,11 @@ async function loadQuestion(results, index) {
     </div>
     <button class="btn return-btn pixel-corners">Return to menu</button>`;
     
-    div.querySelector('.return-btn').addEventListener('click', returnToMenu);
+    div.querySelector('.return-btn').addEventListener('click', () => {
+        stopSound('song2');
+        playBgSong('song1');
+        returnToMenu();
+    });
     div.querySelector('.controls').addEventListener('click', checkAnswer);
 
     return gameContainer.appendChild(div);
@@ -164,7 +179,8 @@ async function checkAnswer(e) {
         if (correctAnswer === e.target.textContent) {
             e.target.classList.add('correct')
             ++state.qIndex;       
-            addCoins(state.questions[state.qIndex].difficulty);                 
+            addCoins(state.questions[state.qIndex].difficulty);     
+            playSound('correct');            
             
         } else {
             e.target.classList.add('incorrect');
@@ -175,6 +191,7 @@ async function checkAnswer(e) {
                 }
             })
             ++state.qIndex;   
+            playSound('incorrect');
         }
 
         if (state.qIndex === state.questions.length - 1) {
@@ -235,6 +252,35 @@ async function getQuiz(difficulty) {
     // console.log(data);
 
     return data;
+}
+
+function playBgSong(song) {
+    const audio = document.getElementById(`${song}`)
+    audio.loop = true;
+    audio.volume = 0.75;
+    audio.play();
+}
+
+function addHoverSound(div) {
+   return div.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('mouseover', () => {
+            playSound('effect');
+        }); 
+        btn.addEventListener('mouseout', () => {
+            stopSound('effect');
+        });
+    })
+}
+
+function playSound(sound) {
+    const audio = document.getElementById(`${sound}`)
+    audio.play();
+}
+
+function stopSound(sound) {
+    const audio = document.getElementById(`${sound}`)
+    audio.pause()
+    audio.currentTime = 0;
 }
 
 function clearUI(type) {

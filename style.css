@@ -99,6 +99,7 @@ body {
   border: 5px solid #ffffff;
   box-shadow: inset 0px 0px 10px 1px rgba(0, 0, 0, 0.4);
   color: #fff;
+  animation: float 3000ms infinite linear;
 }
 
 .title-container {
@@ -224,6 +225,31 @@ body {
   }
 }
   
+@keyframes float {
+  0% {
+    transform: translateY(-10px);
+  }
+  
+  25% {
+    transform: translateY(0px);
+    transform: translateX(15px)
+    
+  }
+  
+  50% {
+    transform: translateY(10px);
+  }
+  
+  75% {
+    transform: translateY(0px);
+    transform: translateX(-15px)
+  }
+
+  100% {
+    transform: translateY(-10px);
+  }
+}
+
 @media only screen and (max-width: 700px) {
   body {
     height: 90vh;
