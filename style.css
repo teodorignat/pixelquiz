@@ -192,6 +192,7 @@ body {
 .answer-btn {
   min-width: 50px;
   min-height: 150px;
+  letter-spacing: 0;
 }
 
 .return-btn {
@@ -256,12 +257,13 @@ body {
   }
 
   #game-container {
-    height: 90%;
+    gap: 1em;
+    height: 95%;
     padding: 20px 10px;
   }
 
   .user-ui {
-    height: 100px;
+    height: 50px;
   }
 
   .status {
@@ -271,7 +273,8 @@ body {
   }
 
   .game-title {
-    font-size: 1em;
+    /* margin-top: 2em; */
+    font-size: .8em;
   }
 
   .title {
@@ -290,7 +293,7 @@ body {
 
   .answer-btn {
     min-width: 50px;
-    min-height: 120px;
+    min-height: 100px;
   }
 }
 
