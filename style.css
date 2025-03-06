@@ -11,7 +11,7 @@
 }
 
 body {
-    min-height: 100vh;
+    height: 100vh;
     font-family: "VT323", monospace;
     font-weight: 400;
     font-style: normal;
@@ -99,7 +99,6 @@ body {
   border: 5px solid #ffffff;
   box-shadow: inset 0px 0px 10px 1px rgba(0, 0, 0, 0.4);
   color: #fff;
-  animation: float 3000ms infinite linear;
 }
 
 .title-container {
@@ -112,6 +111,7 @@ body {
 }
 
 .title {
+  margin-top: 5em;
   min-width: 200px;
   padding: 0 1em;
   font-size: 1em; 
@@ -252,7 +252,7 @@ body {
 
 @media only screen and (max-width: 700px) {
   body {
-    height: 90vh;
+    height: 100dvh;
   }
 
   #game-container {
@@ -275,6 +275,7 @@ body {
   }
 
   .title {
+    margin-top: 1em;
     font-size: .7em;
   }
 

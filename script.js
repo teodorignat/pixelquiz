@@ -77,6 +77,9 @@ function loadMenu() {
 
     div.querySelector('.diff-btn').addEventListener('click', loadDifficulties);
 
+    div.querySelector('.game-title').style.animation = 'float 3000ms infinite linear'
+
+
     addHoverSound(div);
     clearUI('menu');
 
@@ -102,14 +105,16 @@ function loadDifficulties() {
                 <button class="btn pixel-corners ">Hard</button>
             </div>`;
 
-    div.querySelectorAll('.btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            state.difficulty = btn.textContent;
-            updateUI();
-            loadMenu();
-        })
-    })
+            div.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.difficulty = btn.textContent;
+                    updateUI();
+                    loadMenu();
+                })
+            })
+            
 
+            
     clearUI('menu');
     addHoverSound(div);
 
@@ -268,6 +273,9 @@ function addHoverSound(div) {
         }); 
         btn.addEventListener('mouseout', () => {
             stopSound('effect');
+        });
+        btn.addEventListener('click', () => {
+            playSound('effect');
         });
     })
 }
