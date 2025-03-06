@@ -9,6 +9,7 @@ const audio3 = document.getElementById('song3');
 // State
 const state = {
     api_url: 'https://opentdb.com/api.php?',
+    oldDifficulty: 'any',
     difficulty: 'Any',
     coins: 0,
     questions: [],
@@ -107,6 +108,7 @@ function loadDifficulties() {
 
             div.querySelectorAll('.btn').forEach(btn => {
                 btn.addEventListener('click', () => {
+                    state.oldDifficulty = state.difficulty;
                     state.difficulty = btn.textContent;
                     updateUI();
                     loadMenu();
