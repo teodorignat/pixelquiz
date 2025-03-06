@@ -219,7 +219,7 @@ async function checkAnswer(e) {
 function addCoins() {
     const currentQuestion = state.questions[state.qIndex]
     if (currentQuestion.difficulty === 'hard') {
-        state.coins += 125;
+        state.coins += 135;
     } else if (currentQuestion.difficulty === 'medium') {
         state.coins += 100;
     } else {
@@ -230,7 +230,7 @@ function addCoins() {
 
 async function playGame(difficulty) {
     
-    if (state.questions.length) {
+    if (state.questions.length && difficulty === state.oldDifficulty) {
         clearUI('menu');
         return loadQuestion(state.questions, state.qIndex);
     } else {
