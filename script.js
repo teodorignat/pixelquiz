@@ -1,9 +1,8 @@
 // Variables
 
 const gameContainer = document.getElementById('game-container');
-const audio1 = document.getElementById('song1'); 
-const audio2 = document.getElementById('song2'); 
-const audio3 = document.getElementById('song3'); 
+let timeoutId;
+let timerInterval;
 
 
 // State
@@ -13,7 +12,12 @@ const state = {
     difficulty: 'Any',
     coins: 0,
     questions: [],
-    qIndex: 0
+    qIndex: 0,
+    game: {
+        timer: 30,
+        correctA: 0,
+        qPerLevel: 10
+    }
 }
 
 function loadStart() {
@@ -137,6 +141,9 @@ async function loadQuestion(results, index) {
     <div class="title question pixel-corners">
     <h1>${results[index].question}</h1>
     </div>
+    <div class="title timer pixel-corners">
+    <p>${state.game.timer}s</p>
+    </div>
     </div>
     <div class="controls grid">
     ${answers.map(answer => {
@@ -152,10 +159,36 @@ async function loadQuestion(results, index) {
     });
     div.querySelector('.controls').addEventListener('click', checkAnswer);
 
+    setTimer(state.game.timer);
+
     return gameContainer.appendChild(div);
 }
 
+function setTimer(s) {
+    timerInterval = setInterval(() => {
+        state.game.timer--;
+        const timer = gameContainer.querySelector('.timer');
+        timer.querySelector('p').textContent = state.game.timer + 's';
+
+        if (state.game.timer === 10) {
+            timer.style.backgroundColor = 'var(--red-color)';
+        }
+
+        if (state.game.timer === 0) {
+            console.log(state.qIndex)
+            ++state.qIndex;
+            state.game.timer = s;
+            clearUI('menu');
+            clearInterval(timerInterval);
+            loadQuestion(state.questions,state.qIndex)
+        }
+    }, 1000)
+}
+
 function returnToMenu() {
+    if (timeoutId !== undefined) {
+        clearInterval(timeoutId);
+    }
     return loadMenu();
 }
 
@@ -206,8 +239,10 @@ async function checkAnswer(e) {
                 playGame(state.difficulty.toLowerCase())
             }, 1500)
         } else {
-            setTimeout(() => {
+            timeoutId = setTimeout(() => {
                 clearUI('menu');
+                clearInterval(timerInterval);
+                state.game.timer = 30;
                 loadQuestion(state.questions, state.qIndex);
             }, 2000)
         }
