@@ -188,8 +188,11 @@ function setTimer(s) {
 function returnToMenu() {
     if (timeoutId !== undefined) {
         clearInterval(timeoutId);
-        state.game.timer = 30;
     }
+    
+    clearInterval(timerInterval);
+    state.game.timer = 30;
+
     return loadMenu();
 }
 
