@@ -14,7 +14,7 @@ const state = {
     questions: [],
     qIndex: 0,
     game: {
-        timer: 30,
+        timer: 12,
         correctA: 0,
         qPerLevel: 10
     }
@@ -158,9 +158,9 @@ async function loadQuestion(results, index) {
         returnToMenu();
     });
     div.querySelector('.controls').addEventListener('click', checkAnswer);
-
+    
     setTimer(state.game.timer);
-
+    
     return gameContainer.appendChild(div);
 }
 
@@ -169,15 +169,16 @@ function setTimer(s) {
         state.game.timer--;
         const timer = gameContainer.querySelector('.timer');
         timer.querySelector('p').textContent = state.game.timer + 's';
-
+        
         if (state.game.timer === 10) {
             timer.style.backgroundColor = 'var(--red-color)';
+            playSound('ticking');
         }
-
+        
         if (state.game.timer === 0) {
-            console.log(state.qIndex)
             ++state.qIndex;
             state.game.timer = s;
+            stopSound('ticking');
             clearUI('menu');
             clearInterval(timerInterval);
             loadQuestion(state.questions,state.qIndex)
@@ -189,6 +190,10 @@ function returnToMenu() {
     if (timeoutId !== undefined) {
         clearInterval(timeoutId);
     }
+
+    clearInterval(timerInterval);
+    stopSound('ticking');
+
     return loadMenu();
 }
 
@@ -213,8 +218,10 @@ function shuffle(array){
 async function checkAnswer(e) {
     if (e.target.nodeName.toLowerCase() === 'button') {
         const correctAnswer = state.questions[state.qIndex].correct_answer
-
+        
         e.currentTarget.removeEventListener('click', checkAnswer)
+        stopSound('ticking');
+        clearInterval(timerInterval);
         
         if (correctAnswer === e.target.textContent) {
             e.target.classList.add('correct')
@@ -241,7 +248,6 @@ async function checkAnswer(e) {
         } else {
             timeoutId = setTimeout(() => {
                 clearUI('menu');
-                clearInterval(timerInterval);
                 state.game.timer = 30;
                 loadQuestion(state.questions, state.qIndex);
             }, 2000)
