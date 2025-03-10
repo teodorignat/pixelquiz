@@ -14,9 +14,9 @@ const state = {
     questions: [],
     qIndex: 0,
     game: {
-        timer: 12,
+        timer: 30,
         correctA: 0,
-        qPerLevel: 10
+        totalQ: 10
     }
 }
 
@@ -141,9 +141,15 @@ async function loadQuestion(results, index) {
     <div class="title question pixel-corners">
     <h1>${results[index].question}</h1>
     </div>
+    <div class="game-state">
     <div class="title timer pixel-corners">
     <p>${state.game.timer}s</p>
     </div>
+    <div class="title totalQ pixel-corners">
+    <p>${state.game.correctA}/${state.game.totalQ}</p>
+    </div>
+    </div>
+
     </div>
     <div class="controls grid">
     ${answers.map(answer => {
@@ -176,11 +182,11 @@ function setTimer(s) {
         }
         
         if (state.game.timer === 0) {
+            stopSound('ticking');
             ++state.qIndex;
             state.game.timer = s;
-            stopSound('ticking');
-            clearUI('menu');
             clearInterval(timerInterval);
+            clearUI('menu');
             loadQuestion(state.questions,state.qIndex)
         }
     }, 1000)
@@ -190,7 +196,7 @@ function returnToMenu() {
     if (timeoutId !== undefined) {
         clearInterval(timeoutId);
     }
-
+    ++state.qIndex;
     clearInterval(timerInterval);
     stopSound('ticking');
 
@@ -224,9 +230,10 @@ async function checkAnswer(e) {
         clearInterval(timerInterval);
         
         if (correctAnswer === e.target.textContent) {
+            addCoins();  
             e.target.classList.add('correct')
             ++state.qIndex;       
-            addCoins(state.questions[state.qIndex].difficulty);     
+            ++state.game.correctA;
             playSound('correct');            
             
         } else {
@@ -243,6 +250,7 @@ async function checkAnswer(e) {
 
         if (state.qIndex === state.questions.length - 1) {
             setTimeout(() => {
+                state.game.correctA = 0;
                 playGame(state.difficulty.toLowerCase())
             }, 1500)
         } else {
@@ -271,7 +279,7 @@ function addCoins() {
 
 async function playGame(difficulty) {
     
-    if (state.questions.length && difficulty === state.oldDifficulty) {
+    if (state.questions.length && difficulty === state.oldDifficulty && state.questions[state.qIndex]) {
         clearUI('menu');
         return loadQuestion(state.questions, state.qIndex);
     } else {
@@ -282,13 +290,14 @@ async function playGame(difficulty) {
         if (quizData.response_code === 0) {
             state.questions = quizData.results
             state.qIndex = 0;
+            state.game.correctA = 0;
             return loadQuestion(state.questions, state.qIndex)
         }
     }
 }
 
 async function getQuiz(difficulty) {
-    let endpoint = 'amount=50&';
+    let endpoint = 'amount=10&';
 
     if (difficulty !== 'any') {
         endpoint += `difficulty=${difficulty}`
