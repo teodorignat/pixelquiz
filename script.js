@@ -248,7 +248,7 @@ async function checkAnswer(e) {
             playSound('incorrect');
         }
 
-        if (state.qIndex === state.questions.length - 1) {
+        if (state.qIndex >=state.questions.length - 1) {
             setTimeout(() => {
                 state.game.correctA = 0;
                 playGame(state.difficulty.toLowerCase())
