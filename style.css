@@ -302,6 +302,7 @@ body {
 
 .correct, .correct:hover {
   background-color: var(--light-green-color);
+  color: var(--dark-blue-color);
 }
 
 .incorrect, .incorrect:hover {
