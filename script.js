@@ -16,7 +16,8 @@ const state = {
     game: {
         timer: 30,
         correctA: 0,
-        totalQ: 10
+        totalQ: 10,
+        coins: 0
     }
 }
 
@@ -114,7 +115,7 @@ function loadDifficulties() {
                 btn.addEventListener('click', () => {
                     state.oldDifficulty = state.difficulty;
                     state.difficulty = btn.textContent;
-                    updateUI();
+                    updateUI('status');
                     loadMenu();
                 })
             })
@@ -145,7 +146,10 @@ async function loadQuestion(results, index) {
     <div class="title timer pixel-corners">
     <p>${state.game.timer}s</p>
     </div>
-    <div class="title totalQ pixel-corners">
+    <div class="title currentQ pixel-corners">
+    <p>${state.qIndex + 1}</p>
+    </div>
+    <div class="title score pixel-corners">
     <p>${state.game.correctA}/${state.game.totalQ}</p>
     </div>
     </div>
@@ -170,6 +174,53 @@ async function loadQuestion(results, index) {
     return gameContainer.appendChild(div);
 }
 
+function loadResults() {
+    const div = document.createElement('div');
+    div.classList.add('game-menu','menu');
+    div.innerHTML = `<div class="game-menu">
+            <div class="title results pixel-corners">
+                <h1>Results</h1>
+            </div>
+            <div class="results-box pixel-corners">
+                <div class="game-stats pixel-corners">
+                    <div class="stats-box">
+                        <h2>CORRECT</h2>
+                        <p>${state.game.correctA}</p>
+                    </div>
+                    <div class="stats-box">
+                        <h2>TOTAL</h2>
+                        <p>${state.game.totalQ}</p>
+                    </div>
+                    <div class="stats-box">
+                        <h2>DIAMONDS</h2>
+                        <p>${state.game.coins}</p>
+                    </div>
+                </div>
+                <div class="controls">
+                    <button class="btn menu-btn play-btn pixel-corners ">Play again</button>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn return-btn pixel-corners">Return to menu</button>
+            </div>
+        </div>`;
+
+
+    div.querySelector('.play-btn').addEventListener('click', () => {
+        playGame(state.difficulty.toLowerCase());
+        stopSound('song1');
+        playBgSong('song2');
+    });
+
+    div.querySelector('.return-btn').addEventListener('click', () => {
+        stopSound('song2');
+        playBgSong('song1');
+        returnToMenu();
+    });
+
+    return gameContainer.appendChild(div);
+}
+
 function setTimer(s) {
     timerInterval = setInterval(() => {
         state.game.timer--;
@@ -191,6 +242,7 @@ function setTimer(s) {
         }
     }, 1000)
 }
+
 
 function returnToMenu() {
     if (timeoutId !== undefined) {
@@ -231,9 +283,10 @@ async function checkAnswer(e) {
         
         if (correctAnswer === e.target.textContent) {
             addCoins();  
-            e.target.classList.add('correct')
             ++state.qIndex;       
             ++state.game.correctA;
+            e.target.classList.add('correct')
+            updateUI('game');
             playSound('correct');            
             
         } else {
@@ -248,10 +301,12 @@ async function checkAnswer(e) {
             playSound('incorrect');
         }
 
-        if (state.qIndex >=state.questions.length - 1) {
+        if (state.qIndex > state.game.totalQ - 1) {
             setTimeout(() => {
+                clearUI('menu');
+                loadResults();
                 state.game.correctA = 0;
-                playGame(state.difficulty.toLowerCase())
+                state.game.coins = 0;
             }, 1500)
         } else {
             timeoutId = setTimeout(() => {
@@ -269,12 +324,15 @@ function addCoins() {
     const currentQuestion = state.questions[state.qIndex]
     if (currentQuestion.difficulty === 'hard') {
         state.coins += 135;
+        state.game.coins += 135;
     } else if (currentQuestion.difficulty === 'medium') {
         state.coins += 100;
+        state.game.coins += 100;
     } else {
         state.coins += 50;
+        state.game.coins += 50;
     }
-    updateUI();
+    updateUI('status');
 }
 
 async function playGame(difficulty) {
@@ -349,18 +407,24 @@ function clearUI(type) {
     }
 }
 
-function updateUI() {
-    const userUI = document.querySelector('.user-ui');
-    const difficulty = userUI.querySelector('.difficulty p');
-    const coins = userUI.querySelector('.coins p');
-
-    difficulty.textContent = state.difficulty;
-    coins.textContent = state.coins;
+function updateUI(type) {
+    if (type === 'status') {
+        const userUI = document.querySelector('.user-ui');
+        const difficulty = userUI.querySelector('.difficulty p');
+        const coins = userUI.querySelector('.coins p');
+    
+        difficulty.textContent = state.difficulty;
+        coins.textContent = state.coins;
+    } else {
+        const score = gameContainer.querySelector('.score p');
+        
+        score.textContent = `${state.game.correctA}/${state.game.totalQ}`
+    }
 
 }
 
 function init() {
-    document.addEventListener('DOMContentLoaded', loadStart)
+    document.addEventListener('DOMContentLoaded', loadStart);
 }
 
 init();

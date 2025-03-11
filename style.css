@@ -3,7 +3,9 @@
   --light-blue-color: #b3c4d6;
   --dark-blue-color: #344a5a;
   --dark-blue-color2: #576069;
-  --green-color: #8BCAB5;
+  --light-green-color: #8BCAB5;
+  --green-color: #2fbfa4;
+  --dark-green-color: #0b351f;
   --red-color: #ab5656;
   --dark-red-color: #993d41;
   --purple-color: #6A5B86;
@@ -27,7 +29,8 @@ body {
 }
 
 #game-container {
-    width: 95vw;
+    min-width: 600px;
+    width: 60%;
     height: 90vh;
     position: relative;
     background: url(img/pixelbg.png) no-repeat center center fixed; 
@@ -36,7 +39,7 @@ body {
     -o-background-size: cover;
     background-size: cover;
     background-repeat: repeat-x;
-    border-radius: 10px;
+    /* border-radius: 10px; */
     padding: 30px;
     border: 3px solid #000;
     display: flex;
@@ -72,7 +75,7 @@ body {
 
 }
 .fa-diamond, .fa-diamond::before, .fa-diamond::after {
-  color: var(--dark-red-color);
+  color: var(--purple-color);
 }
 
 .game-menu {
@@ -157,7 +160,7 @@ body {
   gap: 2em;
 }
 
-.timer, .totalQ {
+.timer, .score, .currentQ {
   min-width: 100px;
   width: 200px;
   padding: .2em .2em;
@@ -166,18 +169,27 @@ body {
   background-color: var(--purple-color);
 }
 
-.timer p, .totalQ p {
+.timer p, .score p, .currentQ p {
   letter-spacing: 0;
   margin: 0;
   color: #fff;
 }
 
-.totalQ {
-  min-width: 100px;
+.score{
+  background-color: var(--yellow-color);
+}
+
+.score p  {
+  color: var(--purple-color);
+}
+
+.currentQ {
+  width: 100px;
+  padding: .7em 0;
   background-color: var(--dark-blue-color);
 }
 
-.totalQ p {
+.currentQ p {
   color: var(--yellow-color);
 }
 
@@ -194,6 +206,50 @@ body {
   display: grid;
   grid-template-columns: repeat(2, minmax(100px, 1fr));
   grid-gap: 20px;
+}
+
+.results-box {
+  width: 90%;
+  height: 65%;
+  background-color: var(--dark-blue-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+}
+
+.game-stats {
+  width: 85%;
+  height: 70%;
+  padding: 1em;
+  box-sizing: border-box;
+  background-color: var(--purple-color);
+  border: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+}
+
+.stats-box {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stats-box h2 {
+  color: var(--green-color);
+  margin: 0;
+  font-size: 2em;
+}
+.stats-box p{
+  margin: 0;
+  font-size: 3em;
+  font-weight: 700;
+  color: var(--yellow-color);
 }
 
 .btn {
@@ -218,11 +274,11 @@ body {
 }
 
 .start-btn {
-  background-color: var(--green-color);
+  background-color: var(--light-green-color);
 }
 
 .play-btn  {
-  background-color: var(--green-color);
+  background-color: var(--light-green-color);
 }
 
 .answer-btn {
@@ -245,7 +301,7 @@ body {
 }
 
 .correct, .correct:hover {
-  background-color: var(--green-color);
+  background-color: var(--light-green-color);
 }
 
 .incorrect, .incorrect:hover {
@@ -293,9 +349,11 @@ body {
   }
 
   #game-container {
-    gap: 1em;
+    min-width: 200px;
+    width: 95vw;
     height: 92%;
     padding: 20px 10px;
+    gap: 1em;
   }
 
   .user-ui {
@@ -321,10 +379,20 @@ body {
     margin-top: 1em;
   }
 
-  .timer, .totalQ {
-    min-width: 70px;
-    width: 90px;
+  .game-state {
+    gap: .7em;
+  }
+
+  .timer, .score, .currentQ {
+    min-width: 50px;
+    width: 100px;
     font-size: 1.5em;
+    border: 2px solid var(--yellow-color);
+  }
+
+  .currentQ {
+    width: 50px;
+    padding: .5em 0;
   }
 
   .btn {
