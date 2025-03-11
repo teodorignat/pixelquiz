@@ -8,8 +8,8 @@ let timerInterval;
 // State
 const state = {
     api_url: 'https://opentdb.com/api.php?',
-    oldDifficulty: 'any',
     difficulty: 'Any',
+    oldDifficulty: 'any',
     coins: 0,
     questions: [],
     qIndex: 0,
@@ -113,7 +113,7 @@ function loadDifficulties() {
 
             div.querySelectorAll('.btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    state.oldDifficulty = state.difficulty;
+                    state.oldDifficulty = state.difficulty.toLowerCase();
                     state.difficulty = btn.textContent;
                     updateUI('status');
                     loadMenu();
@@ -336,7 +336,6 @@ function addCoins() {
 }
 
 async function playGame(difficulty) {
-    
     if (state.questions.length && difficulty === state.oldDifficulty && state.questions[state.qIndex]) {
         clearUI('menu');
         return loadQuestion(state.questions, state.qIndex);
@@ -349,6 +348,7 @@ async function playGame(difficulty) {
             state.questions = quizData.results
             state.qIndex = 0;
             state.game.correctA = 0;
+            state.oldDifficulty = state.difficulty.toLowerCase();
             return loadQuestion(state.questions, state.qIndex)
         }
     }
