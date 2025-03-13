@@ -214,10 +214,6 @@ function loadResults() {
                         <h2>DIAMONDS</h2>
                         <p>${state.game.coins}</p>
                     </div>
-                    <div class="stats-box">
-                        <h2>DIAMONDS</h2>
-                        <p>${state.game.coins}</p>
-                    </div>
                 </div>
                 <div class="controls">
                     <button class="btn menu-btn play-btn pixel-corners ">Play again</button>
