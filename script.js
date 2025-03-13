@@ -13,6 +13,12 @@ const state = {
     coins: 0,
     questions: [],
     qIndex: 0,
+    rankLevel: ['Brain Sprout', 'Info Collector', 'Mind Sculptor', 'Truth Hunter', 'Wisdom Seeker', 'Knowledge Master', 'Quiz Genius','Master of Minds'],
+    user: {
+        rankIndex: 0,
+        consecutiveWins: 0,
+        consecutiveLosses: 0
+    },
     game: {
         timer: 30,
         correctA: 0,
@@ -44,13 +50,21 @@ function loadStart() {
 function loadUI() {
     const div = document.createElement('div');
     div.classList.add('user-ui');
-    div.innerHTML = `<div class="status difficulty pixel-corners">
-                <i class="fa-solid fa-hat-wizard"></i>
-                <p>${state.difficulty}</p>
+    div.innerHTML = `<div class="status-row">
+                <div class="status difficulty pixel-corners">
+                    <i class="fa-solid fa-hat-wizard"></i>
+                    <p>${state.difficulty}</p>
+                </div>
+                <div class="status coins pixel-corners">
+                    <i class="fa-solid fa-diamond"></i>
+                    <p>${state.coins}</p>
+                </div>
             </div>
-            <div class="status coins pixel-corners">
-                <i class="fa-solid fa-diamond"></i>
-                <p>${state.coins}</p>
+            <div class="status-row">
+                <div class="status level pixel-corners">
+                    <i class="fa-solid fa-trophy"></i>
+                    <p>${state.rankLevel[state.user.rankIndex]}</p>
+                </div>
             </div>`;
 
 
@@ -175,14 +189,19 @@ async function loadQuestion(results, index) {
 }
 
 function loadResults() {
+    updateRank();
+
     const div = document.createElement('div');
     div.classList.add('game-menu','menu');
-    div.innerHTML = `<div class="game-menu">
-            <div class="title results pixel-corners">
-                <h1>Results</h1>
-            </div>
-            <div class="results-box pixel-corners">
+    div.innerHTML = ` <div class="results-box pixel-corners">
+                <div class="title results pixel-corners">
+                    <h1>Results</h1>
+                </div>
                 <div class="game-stats pixel-corners">
+                    <div class="stats-box rank pixel-corners">
+                        <h2>Rank</h2>
+                        <p>${state.rankLevel[state.user.rankIndex]}</p>
+                    </div>
                     <div class="stats-box">
                         <h2>CORRECT</h2>
                         <p>${state.game.correctA}</p>
@@ -190,6 +209,10 @@ function loadResults() {
                     <div class="stats-box">
                         <h2>TOTAL</h2>
                         <p>${state.game.totalQ}</p>
+                    </div>
+                    <div class="stats-box">
+                        <h2>DIAMONDS</h2>
+                        <p>${state.game.coins}</p>
                     </div>
                     <div class="stats-box">
                         <h2>DIAMONDS</h2>
@@ -305,8 +328,6 @@ async function checkAnswer(e) {
             setTimeout(() => {
                 clearUI('menu');
                 loadResults();
-                state.game.correctA = 0;
-                state.game.coins = 0;
             }, 1500)
         } else {
             timeoutId = setTimeout(() => {
@@ -315,8 +336,8 @@ async function checkAnswer(e) {
                 loadQuestion(state.questions, state.qIndex);
             }, 2000)
         }
-
-
+        
+        
     }
 }
 
@@ -335,6 +356,27 @@ function addCoins() {
     updateUI('status');
 }
 
+function updateRank() {
+    if (state.game.correctA >= 7) {
+        ++state.user.consecutiveWins;
+        state.user.consecutiveLosses = 0;
+        if (state.user.consecutiveWins === 3 && state.user.rankIndex < state.rankLevel.length - 1) {
+            state.user.rankIndex++;
+            state.user.consecutiveWins = 0;
+            updateUI('status');
+        }
+        
+    } else {
+        ++state.user.consecutiveLosses;
+        state.user.consecutiveWins = 0;
+        if (state.user.consecutiveLosses === 3 && state.user.rankIndex > 0) {
+            state.user.rankIndex--;
+            state.user.consecutiveLosses = 0;
+            updateUI('status');
+        }
+    }
+}
+
 async function playGame(difficulty) {
     if (state.questions.length && difficulty === state.oldDifficulty && state.questions[state.qIndex]) {
         clearUI('menu');
@@ -347,7 +389,9 @@ async function playGame(difficulty) {
         if (quizData.response_code === 0) {
             state.questions = quizData.results
             state.qIndex = 0;
+            state.game.timer = 30;
             state.game.correctA = 0;
+            state.game.coins = 0;
             state.oldDifficulty = state.difficulty.toLowerCase();
             return loadQuestion(state.questions, state.qIndex)
         }
@@ -412,9 +456,11 @@ function updateUI(type) {
         const userUI = document.querySelector('.user-ui');
         const difficulty = userUI.querySelector('.difficulty p');
         const coins = userUI.querySelector('.coins p');
+        const rank = userUI.querySelector('.status.level p');
     
         difficulty.textContent = state.difficulty;
         coins.textContent = state.coins;
+        rank.textContent = state.rankLevel[state.user.rankIndex];
     } else {
         const score = gameContainer.querySelector('.score p');
         
