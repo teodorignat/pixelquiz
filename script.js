@@ -353,7 +353,7 @@ function addCoins() {
 }
 
 function updateRank() {
-    if (state.game.correctA >= 7) {
+    if (state.game.correctA >= 3) {
         ++state.user.consecutiveWins;
         state.user.consecutiveLosses = 0;
         if (state.user.consecutiveWins === 3 && state.user.rankIndex < state.rankLevel.length - 1) {
