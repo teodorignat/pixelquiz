@@ -13,11 +13,13 @@ const state = {
     coins: 0,
     questions: [],
     qIndex: 0,
-    rankLevel: ['Brain Sprout', 'Info Collector', 'Mind Sculptor', 'Truth Hunter', 'Wisdom Seeker', 'Knowledge Master', 'Quiz Genius','Master of Minds'],
+    rankLevel: [
+        'Brain Sprout', 'Info Collector', 'Mind Sculptor', 'Truth Hunter', 'Wisdom Seeker', 'Knowledge Master', 'Quiz Genius','Master of Minds'],
     user: {
         rankIndex: 0,
         consecutiveWins: 0,
-        consecutiveLosses: 0
+        consecutiveLosses: 0,
+        gameHistory: []
     },
     game: {
         timer: 30,
@@ -63,6 +65,7 @@ function loadUI() {
             <div class="status-row">
                 <div class="status level pixel-corners">
                     <i class="fa-solid fa-trophy"></i>
+                    <p class="index">${state.user.rankIndex + 1}</p>
                     <p>${state.rankLevel[state.user.rankIndex]}</p>
                 </div>
             </div>`;
@@ -85,7 +88,7 @@ function loadMenu() {
             <div class="controls">
                 <button class="btn play-btn pixel-corners ">Play</button>
                 <button class="btn diff-btn pixel-corners ">Difficulty</button>
-                <button class="btn shop-btn pixel-corners ">Shop</button>
+                <button class="btn shop-btn pixel-corners ">Subjects</button>
             </div>`;
 
 
@@ -97,7 +100,7 @@ function loadMenu() {
 
     div.querySelector('.diff-btn').addEventListener('click', loadDifficulties);
 
-    div.querySelector('.game-title').style.animation = 'float 3000ms infinite linear'
+    // div.querySelector('.game-title').style.animation = 'float 3000ms infinite linear'
 
 
     addHoverSound(div);
@@ -213,6 +216,18 @@ function loadResults() {
                     <div class="stats-box">
                         <h2>DIAMONDS</h2>
                         <p>${state.game.coins}</p>
+                    </div>
+                    <div class="stats-box history pixel-corners">
+                        <h2>PREVIOUS QUIZZES</h2>
+                        <div class="prev-quiz">
+                            ${state.user.gameHistory.map(result => {
+                                if (result === 'W') {
+                                    return `<p class="win">W</p>`
+                                } else {
+                                    return `<p class="lose">L</p>`
+                                }
+                            }).join('')}
+                        </div>
                     </div>
                 </div>
                 <div class="controls">
@@ -356,6 +371,12 @@ function updateRank() {
     if (state.game.correctA >= 3) {
         ++state.user.consecutiveWins;
         state.user.consecutiveLosses = 0;
+        state.user.gameHistory.push('W');
+
+        if (state.user.gameHistory.length > 3) {
+            state.user.gameHistory.shift();
+        }    
+        
         if (state.user.consecutiveWins === 3 && state.user.rankIndex < state.rankLevel.length - 1) {
             state.user.rankIndex++;
             state.user.consecutiveWins = 0;
@@ -365,6 +386,12 @@ function updateRank() {
     } else {
         ++state.user.consecutiveLosses;
         state.user.consecutiveWins = 0;
+        state.user.gameHistory.push('L');
+        
+        if (state.user.gameHistory.length > 3) {
+            state.user.gameHistory.shift();
+        }
+
         if (state.user.consecutiveLosses === 3 && state.user.rankIndex > 0) {
             state.user.rankIndex--;
             state.user.consecutiveLosses = 0;
@@ -376,6 +403,7 @@ function updateRank() {
 async function playGame(difficulty) {
     if (state.questions.length && difficulty === state.oldDifficulty && state.questions[state.qIndex]) {
         clearUI('menu');
+        state.game.timer = 30;
         return loadQuestion(state.questions, state.qIndex);
     } else {
         const quizData = await getQuiz(difficulty);
