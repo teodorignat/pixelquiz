@@ -66,7 +66,7 @@ function loadUI() {
                 <div class="status level pixel-corners">
                     <i class="fa-solid fa-trophy"></i>
                     <p class="index">${state.user.rankIndex + 1}</p>
-                    <p>${state.rankLevel[state.user.rankIndex]}</p>
+                    <p class="rank-level">${state.rankLevel[state.user.rankIndex]}</p>
                 </div>
             </div>`;
 
@@ -480,11 +480,13 @@ function updateUI(type) {
         const userUI = document.querySelector('.user-ui');
         const difficulty = userUI.querySelector('.difficulty p');
         const coins = userUI.querySelector('.coins p');
-        const rank = userUI.querySelector('.status.level p');
+        const rank = userUI.querySelector('.status.level .rank-level');
+        const rankIndex = userUI.querySelector('.status.level .index');
     
         difficulty.textContent = state.difficulty;
         coins.textContent = state.coins;
         rank.textContent = state.rankLevel[state.user.rankIndex];
+        rankIndex.textContent = state.user.rankIndex + 1;
     } else {
         const score = gameContainer.querySelector('.score p');
         
