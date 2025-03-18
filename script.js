@@ -7,16 +7,28 @@ let timerInterval;
 
 // State
 const state = {
-    api_url: 'https://opentdb.com/api.php?',
-    difficulty: 'Any',
-    oldDifficulty: 'any',
+    api_url: 'https://the-trivia-api.com/v2/questions?',
+    difficulty: ['easy', 'medium', 'hard'],
     coins: 0,
     questions: [],
     qIndex: 0,
+    categories: [
+        {name:"music", checked: true}, 
+        {name: "sport_and_leisure", checked: true},
+        {name: "film_and_tv", checked: true},
+        {name: "arts_and_literature", checked: true},
+        {name: "history", checked: true},
+        {name: "society_and_culture", checked: true},
+        {name: "science", checked: true},
+        {name: "geography", checked: true},
+        {name: "food_and_drink", checked: true},
+        {name: "general_knowledge", checked: true}
+    ],
     rankLevel: [
         'Brain Sprout', 'Info Collector', 'Mind Sculptor', 'Truth Hunter', 'Wisdom Seeker', 'Knowledge Master', 'Quiz Genius','Master of Minds'],
     user: {
         rankIndex: 0,
+        rankUp: false,
         consecutiveWins: 0,
         consecutiveLosses: 0,
         gameHistory: []
@@ -53,10 +65,6 @@ function loadUI() {
     const div = document.createElement('div');
     div.classList.add('user-ui');
     div.innerHTML = `<div class="status-row">
-                <div class="status difficulty pixel-corners">
-                    <i class="fa-solid fa-hat-wizard"></i>
-                    <p>${state.difficulty}</p>
-                </div>
                 <div class="status coins pixel-corners">
                     <i class="fa-solid fa-diamond"></i>
                     <p>${state.coins}</p>
@@ -86,21 +94,29 @@ function loadMenu() {
                 <h1>Menu</h1>
             </div>
             <div class="controls">
-                <button class="btn play-btn pixel-corners ">Play</button>
+                ${state.questions.length && state.qIndex <= state.game.totalQ - 1 ? '<button class="btn continue-btn pixel-corners ">Continue Game</button>' : ''}
+                <button class="btn play-btn pixel-corners ">New Game</button>
                 <button class="btn diff-btn pixel-corners ">Difficulty</button>
-                <button class="btn shop-btn pixel-corners ">Subjects</button>
+                <button class="btn cat-btn pixel-corners ">Subjects</button>
             </div>`;
 
 
     div.querySelector('.play-btn').addEventListener('click', () => {
-        playGame(state.difficulty.toLowerCase());
+        playGame(state.difficulty);
         stopSound('song1');
         playBgSong('song2');
     });
 
     div.querySelector('.diff-btn').addEventListener('click', loadDifficulties);
+    div.querySelector('.cat-btn').addEventListener('click', loadCategories);
 
-    // div.querySelector('.game-title').style.animation = 'float 3000ms infinite linear'
+    if (state.questions.length && state.qIndex <= state.game.totalQ -1) {
+        div.querySelector('.continue-btn').addEventListener('click', () => {
+            continueGame(state.questions, state.qIndex);
+            stopSound('song1');
+            playBgSong('song2');
+        });
+    }
 
 
     addHoverSound(div);
@@ -109,55 +125,144 @@ function loadMenu() {
     return gameContainer.appendChild(div);
 }
 
-
 function loadDifficulties() {
     const div = document.createElement('div');
     div.classList.add('game-menu', 'menu');
-    div.innerHTML = `<div class="title-container">
-                <div class="game-title pixel-corners">
-                    <h1>Pixel Quiz</h1>
-                </div>
-            </div>
-            <div class="title pixel-corners">
+    div.innerHTML = ` <div class="title pixel-corners">
                 <h1>Set Difficulty</h1>
             </div>
             <div class="controls">
-                <button class="btn pixel-corners ">Any</button>
-                <button class="btn pixel-corners ">Easy</button>
-                <button class="btn pixel-corners ">Medium</button>
-                <button class="btn pixel-corners ">Hard</button>
+                <button class="btn radio-btn pixel-corners ">
+                    <p>Easy</p>
+                    <div class="radio pixel-corners"></div>
+                </button>
+                <button class="btn radio-btn pixel-corners ">
+                    <p>Medium</p>
+                    <div class="radio pixel-corners"></div>
+                </button>
+                <button class="btn radio-btn pixel-corners ">
+                    <p>Hard</p>
+                    <div class="radio pixel-corners"></div>
+                </button>
+                <button class="btn return-btn pixel-corners">Return to Menu</button>
             </div>`;
 
-            div.querySelectorAll('.btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    state.oldDifficulty = state.difficulty.toLowerCase();
-                    state.difficulty = btn.textContent;
-                    updateUI('status');
-                    loadMenu();
+            div.querySelectorAll('.radio-btn').forEach(btn => {
+                const difficulty = btn.querySelector('p').textContent.toLowerCase();
+                btn.addEventListener('click', (e) => {
+                    toggleDifficulty(difficulty, e)
                 })
             })
+            div.querySelector('.return-btn').addEventListener('click', () => {
+                returnToMenu('menu');
+            });
             
-
-            
+    checkDifficulties(div);
     clearUI('menu');
     addHoverSound(div);
 
     return gameContainer.appendChild(div);
+}
+
+function checkDifficulties(div) {
+    const radioBtns = div.querySelectorAll('.radio-btn');
+
+    if (!state.difficulty.length) {
+        state.difficulty = ['easy', 'medium', 'hard'];
+    }
+
+    radioBtns.forEach(btn => {
+        const difficulty = btn.querySelector('p').textContent.toLowerCase();
+        const radio = btn.querySelector('.radio');
+        if (state.difficulty.includes(difficulty)) {
+            btn.querySelector('.radio').classList.add('checked');
+            radio.appendChild(createCheckIcon());
+        }
+    })
+
+}
+
+function toggleDifficulty (difficulty, e) {
+    const radio = e.currentTarget.querySelector('.radio');
+    const checkedIcon = document.createElement('i');
+    checkedIcon.classList.add('fa-solid', 'fa-check');
+    
+    if (state.difficulty.includes(difficulty)) {
+        state.difficulty = state.difficulty.filter(diff => diff !== difficulty);
+        radio.classList.remove('checked');
+        radio.querySelector('i').remove();
+    } else {
+        state.difficulty.push(difficulty);
+        radio.classList.add('checked');
+        radio.appendChild(createCheckIcon());
+    }
+}
+
+function createCheckIcon() {
+    const icon = document.createElement('i');
+    icon.classList.add('fa-solid', 'fa-check');
+    return icon;
+}
+
+function loadCategories() {
+    const div = document.createElement('div');
+    div.classList.add('game-menu', 'menu');
+    div.innerHTML = `<div class="title pixel-corners">
+                <h1>Set Subjects</h1>
+            </div>
+            <div class="controls scroll">
+                ${state.categories.map(category => {
+                    return `<button class="btn radio-btn pixel-corners ">
+                    <p>${category.name.replaceAll('_',' ').toUpperCase()}</p>
+                    <div class="radio ${category.checked ? 'checked' : ''} pixel-corners">${category.checked ? "<i class='fa-solid fa-check'></i>" : ''}</div>`
+                }).join('')}
+                <button class="btn return-btn pixel-corners">Return to Menu</button>
+            </div>`;
+
+    div.querySelectorAll('.radio-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {toggleCategory(e)})
+    });
+
+    div.querySelector('.return-btn').addEventListener('click', () => {
+        returnToMenu('menu');
+    });
+
+    clearUI('menu');
+    addHoverSound(div);
+    
+    return gameContainer.appendChild(div);
+}
+
+function toggleCategory(e) {
+    const category = e.currentTarget.querySelector('p').textContent.toLowerCase().replaceAll(' ','_');
+    const radio = e.currentTarget.querySelector('.radio');
+    const checkedIcon = document.createElement('i');
+    checkedIcon.classList.add('fa-solid', 'fa-check');
+    
+    if (state.categories.find(cat => cat.name === category).checked) {
+        state.categories.find(cat => cat.name === category).checked = false;
+        radio.classList.remove('checked');
+        radio.querySelector('i').remove();
+    } else {
+        state.categories.find(cat => cat.name === category).checked = true;
+        radio.classList.add('checked');
+        radio.appendChild(createCheckIcon());
+    }
 }
 
 async function loadQuestion(results, index) {
     const div = document.createElement('div');
     let answers = [];
-    answers.push(results[index].correct_answer);
-    answers.push(...results[index].incorrect_answers);
+    answers.push(results[index].correctAnswer);
+    answers.push(...results[index].incorrectAnswers);
     answers = shuffle(answers);
     div.classList.add('game-menu','game');
     div.innerHTML = `<div class="question-box">
     <div class="title category pixel-corners">
-    <h2>${results[index].category}</h2>
+    <h2>${results[index].category.replaceAll('_',' ').toUpperCase()}</h2>
     </div>
     <div class="title question pixel-corners">
-    <h1>${results[index].question}</h1>
+    <h1>${results[index].question.text}</h1>
     </div>
     <div class="game-state">
     <div class="title timer pixel-corners">
@@ -182,12 +287,13 @@ async function loadQuestion(results, index) {
     div.querySelector('.return-btn').addEventListener('click', () => {
         stopSound('song2');
         playBgSong('song1');
-        returnToMenu();
+        returnToMenu('game');
     });
     div.querySelector('.controls').addEventListener('click', checkAnswer);
     
     setTimer(state.game.timer);
-    
+    clearUI('menu');
+
     return gameContainer.appendChild(div);
 }
 
@@ -201,8 +307,8 @@ function loadResults() {
                     <h1>Results</h1>
                 </div>
                 <div class="game-stats pixel-corners">
-                    <div class="stats-box rank pixel-corners">
-                        <h2>Rank</h2>
+                    <div class="stats-box rank ${state.user.rankUp? 'rank-up' : ''} pixel-corners">
+                        <h2>${state.user.rankUp ? 'Rank UP' : 'Rank' }</h2>
                         <p>${state.rankLevel[state.user.rankIndex]}</p>
                     </div>
                     <div class="stats-box">
@@ -241,7 +347,7 @@ function loadResults() {
 
 
     div.querySelector('.play-btn').addEventListener('click', () => {
-        playGame(state.difficulty.toLowerCase());
+        playGame(state.difficulty);
         stopSound('song1');
         playBgSong('song2');
     });
@@ -249,8 +355,10 @@ function loadResults() {
     div.querySelector('.return-btn').addEventListener('click', () => {
         stopSound('song2');
         playBgSong('song1');
-        returnToMenu();
+        returnToMenu('menu');
     });
+
+    clearUI('menu');
 
     return gameContainer.appendChild(div);
 }
@@ -271,20 +379,29 @@ function setTimer(s) {
             ++state.qIndex;
             state.game.timer = s;
             clearInterval(timerInterval);
-            clearUI('menu');
-            loadQuestion(state.questions,state.qIndex)
+
+            if (state.qIndex > state.game.totalQ - 1) {
+                loadResults();
+            } else {
+                if (timeoutId !== undefined) {
+                    clearInterval(timeoutId);
+                }
+                loadQuestion(state.questions,state.qIndex)
+            }
         }
     }, 1000)
 }
 
 
-function returnToMenu() {
-    if (timeoutId !== undefined) {
-        clearInterval(timeoutId);
+function returnToMenu(type) {
+    if (type === 'game') {
+        if (timeoutId !== undefined) {
+            clearInterval(timeoutId);
+        }
+        ++state.qIndex;
+        clearInterval(timerInterval);
+        stopSound('ticking');
     }
-    ++state.qIndex;
-    clearInterval(timerInterval);
-    stopSound('ticking');
 
     return loadMenu();
 }
@@ -309,7 +426,7 @@ function shuffle(array){
 
 async function checkAnswer(e) {
     if (e.target.nodeName.toLowerCase() === 'button') {
-        const correctAnswer = state.questions[state.qIndex].correct_answer
+        const correctAnswer = state.questions[state.qIndex].correctAnswer
         
         e.currentTarget.removeEventListener('click', checkAnswer)
         stopSound('ticking');
@@ -337,12 +454,10 @@ async function checkAnswer(e) {
 
         if (state.qIndex > state.game.totalQ - 1) {
             setTimeout(() => {
-                clearUI('menu');
                 loadResults();
             }, 1500)
         } else {
             timeoutId = setTimeout(() => {
-                clearUI('menu');
                 state.game.timer = 30;
                 loadQuestion(state.questions, state.qIndex);
             }, 2000)
@@ -380,6 +495,7 @@ function updateRank() {
         if (state.user.consecutiveWins === 3 && state.user.rankIndex < state.rankLevel.length - 1) {
             state.user.rankIndex++;
             state.user.consecutiveWins = 0;
+            state.user.rankUp = true;
             updateUI('status');
         }
         
@@ -400,48 +516,44 @@ function updateRank() {
     }
 }
 
-async function playGame(difficulty) {
-    if (state.questions.length && difficulty === state.oldDifficulty && state.questions[state.qIndex]) {
-        clearUI('menu');
-        state.game.timer = 30;
-        return loadQuestion(state.questions, state.qIndex);
-    } else {
-        const quizData = await getQuiz(difficulty);
-        clearUI('menu');
-        
-        console.log(quizData);
-        if (quizData.response_code === 0) {
-            state.questions = quizData.results
-            state.qIndex = 0;
-            state.game.timer = 30;
-            state.game.correctA = 0;
-            state.game.coins = 0;
-            state.oldDifficulty = state.difficulty.toLowerCase();
-            return loadQuestion(state.questions, state.qIndex)
-        }
-    }
+function continueGame(questions, index) {
+    state.game.timer = 30;
+    return loadQuestion(questions, index);
 }
 
-async function getQuiz(difficulty) {
-    let endpoint = 'amount=10&';
 
-    if (difficulty !== 'any') {
-        endpoint += `difficulty=${difficulty}`
-    } 
+async function playGame(difficulty, categories) {
+        const quizData = await getQuiz(difficulty, categories);
+        
+        console.log(quizData);
+        state.questions = quizData;
+        state.qIndex = 0;
+        state.game.timer = 30;
+        state.game.correctA = 0;
+        state.game.coins = 0;
+        return loadQuestion(state.questions, state.qIndex)
+}
 
-    const response = await fetch(state.api_url + endpoint);
+async function getQuiz(difficulty, cat) {
+    let difficulties = `difficulties=${difficulty.join(',')}`;
+    let categories = `categories=${
+        state.categories
+            .filter(cat => cat.checked)
+            .map(cat => cat.name)
+            .join(',')
+    }`
+
+    const response = await fetch(state.api_url + difficulties + '&' + categories);
     const data = await response.json();
-
-    // console.log(data);
 
     return data;
 }
 
 function playBgSong(song) {
     const audio = document.getElementById(`${song}`)
-    audio.loop = true;
-    audio.volume = 0.75;
-    audio.play();
+    // audio.loop = true;
+    // audio.volume = 0.75;
+    // audio.play();
 }
 
 function addHoverSound(div) {
@@ -478,12 +590,10 @@ function clearUI(type) {
 function updateUI(type) {
     if (type === 'status') {
         const userUI = document.querySelector('.user-ui');
-        const difficulty = userUI.querySelector('.difficulty p');
         const coins = userUI.querySelector('.coins p');
         const rank = userUI.querySelector('.status.level .rank-level');
         const rankIndex = userUI.querySelector('.status.level .index');
     
-        difficulty.textContent = state.difficulty;
         coins.textContent = state.coins;
         rank.textContent = state.rankLevel[state.user.rankIndex];
         rankIndex.textContent = state.user.rankIndex + 1;
@@ -496,7 +606,7 @@ function updateUI(type) {
 }
 
 function init() {
-    document.addEventListener('DOMContentLoaded', loadStart);
+    // document.addEventListener('DOMContentLoaded', loadStart);
 }
 
 init();
