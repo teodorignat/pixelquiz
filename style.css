@@ -92,6 +92,7 @@ body {
 .status.level p {
   color: var(--yellow-color);
   font-size: 1.5rem;
+  animation: pixelate 1000ms infinite;
 }
 
 .status.level .index {
@@ -109,6 +110,7 @@ body {
 
 .fa-trophy, .fa-trophy::before, .fa-trophy::after {
   color: var(--light-yellow);
+  animation: pixelate 1000ms infinite;
 }
 .game-menu {
   height: 100%;
@@ -141,16 +143,18 @@ body {
 }
 
 .title-container {
-  width: 100%;
+  width: 90%;
+  padding: 1em;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 2em;
+
 }
 
 .title {
   min-width: 200px;
-  padding: 0 1em;
+  padding: 1em;
   font-size: 1em; 
   background-color: var(--light-blue-color);
   text-align: center;
@@ -158,6 +162,10 @@ body {
   border: 5px solid #ffffff;
   box-shadow: inset 0px 0px 10px 1px rgba(0, 0, 0, 0.4);
   color: var(--dark-blue-color);
+}
+
+.title h1 {
+  margin: 0;
 }
 
 .question-box {
@@ -171,18 +179,20 @@ body {
 
 .question {
   width: 80%;
-  padding: 0 .5em;
+  padding: 1em .5em;
   letter-spacing: 0;
 }
 
 .category {
   min-width: 100px;
+  padding: 1em .5em;
   background-color: var(--dark-color);
   color: #fff;
   font-weight: 500;
 }
 
 .category h2 {
+  margin: 0;
   font-weight: 500;
 }
 
@@ -229,6 +239,7 @@ body {
 
 .controls {
   width: 100%;
+  padding: .5em;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -310,6 +321,7 @@ body {
 
 .stats-box.rank p {
   color: var(--yellow-color);
+  animation: pixelate 1000ms infinite;
 }
 
 .stats-box.rank-up {
@@ -418,6 +430,19 @@ body {
   text-align: left;
 }
 
+.select-btn {
+  min-width: 50px;
+  width: 100px;
+  padding: 1em;
+  font-size: 1em;
+  border: 3px solid #000;
+  background-color: var(--dark-blue-color);
+  color: var(--yellow-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .start-btn {
   background-color: var(--light-green-color);
 }
@@ -444,9 +469,13 @@ body {
   top: 90%;
 }
 
-.start-btn:hover, .play-btn:hover, .answer-btn:hover, .return-btn:hover {
+.start-btn:hover, .play-btn:hover, .answer-btn:hover, .return-btn:hover, .select-btn:hover {
   background-color: var(--purple-color);
   color: var(--yellow-color);
+}
+
+.select-btn:hover {
+  transform: translateY(0px);
 }
 
 .correct, .correct:hover {
@@ -458,6 +487,19 @@ body {
   background-color: var(--red-color);
   color: #fff;
 }
+
+@keyframes pixelate {
+  0% {
+    filter: none;
+  }
+  50% {
+    filter: contrast(150%) brightness(150%) saturate(200%) blur(.5px);
+  }
+  100% {
+    filter: none;
+  }
+}
+
 
 @keyframes mist {
   0% {
@@ -610,6 +652,13 @@ body {
     border-width: 4px;
   }
 
+  .select-btn {
+    min-width: 50px;
+    width: 100px;
+    padding: .8em;
+    font-size: 1em;
+  }
+
   .answer-btn {
     min-width: 60px;
     min-height: 100px;
@@ -666,11 +715,17 @@ body {
     margin: 0;
   }
 
+  .title-container {
+    gap: .5em;
+  }
+
   .title {
-    min-width: 150px;
+    min-width: 80px;
+    max-width: 300px;
+    width: 80%;
     font-size: .5em;
   }
-  
+
   .game-menu {
     gap: 1em;
   }
@@ -712,7 +767,7 @@ body {
   }
 
   .controls.scroll {
-    height: 65%;
+    height: 62%;
   }
 
   .btn {
@@ -765,6 +820,13 @@ body {
     width: 90%;
     padding: .2em 1em;
     font-size: 1em;
+  }
+
+  .select-btn {
+    min-width: 50px;
+    width: 90px;
+    height: 45px;
+    font-size: .6em;
   }
 
   .answer-btn {

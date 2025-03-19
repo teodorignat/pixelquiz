@@ -6,12 +6,13 @@ let timerInterval;
 
 
 // State
-const state = {
+let state = {
     api_url: 'https://the-trivia-api.com/v2/questions?',
     difficulty: ['easy', 'medium', 'hard'],
     coins: 0,
     questions: [],
     qIndex: 0,
+    selectAll: true,
     categories: [
         {name:"music", checked: true}, 
         {name: "sport_and_leisure", checked: true},
@@ -102,7 +103,7 @@ function loadMenu() {
 
 
     div.querySelector('.play-btn').addEventListener('click', () => {
-        playGame(state.difficulty);
+        newGame();
         stopSound('song1');
         playBgSong('song2');
     });
@@ -169,6 +170,7 @@ function checkDifficulties(div) {
 
     if (!state.difficulty.length) {
         state.difficulty = ['easy', 'medium', 'hard'];
+        updateStateStorage();
     }
 
     radioBtns.forEach(btn => {
@@ -184,8 +186,6 @@ function checkDifficulties(div) {
 
 function toggleDifficulty (difficulty, e) {
     const radio = e.currentTarget.querySelector('.radio');
-    const checkedIcon = document.createElement('i');
-    checkedIcon.classList.add('fa-solid', 'fa-check');
     
     if (state.difficulty.includes(difficulty)) {
         state.difficulty = state.difficulty.filter(diff => diff !== difficulty);
@@ -196,6 +196,8 @@ function toggleDifficulty (difficulty, e) {
         radio.classList.add('checked');
         radio.appendChild(createCheckIcon());
     }
+
+    updateStateStorage();
 }
 
 function createCheckIcon() {
@@ -207,8 +209,11 @@ function createCheckIcon() {
 function loadCategories() {
     const div = document.createElement('div');
     div.classList.add('game-menu', 'menu');
-    div.innerHTML = `<div class="title pixel-corners">
-                <h1>Set Subjects</h1>
+    div.innerHTML = `<div class="title-container">
+                <div class="title pixel-corners">
+                    <h1>Set Subjects</h1>
+                </div>
+                <button class="btn select-btn pixel-corners ">Select All</button>
             </div>
             <div class="controls scroll">
                 ${state.categories.map(category => {
@@ -227,6 +232,8 @@ function loadCategories() {
         returnToMenu('menu');
     });
 
+    div.querySelector('.select-btn').addEventListener('click', toggleSelectAll);
+
     clearUI('menu');
     addHoverSound(div);
     
@@ -236,8 +243,6 @@ function loadCategories() {
 function toggleCategory(e) {
     const category = e.currentTarget.querySelector('p').textContent.toLowerCase().replaceAll(' ','_');
     const radio = e.currentTarget.querySelector('.radio');
-    const checkedIcon = document.createElement('i');
-    checkedIcon.classList.add('fa-solid', 'fa-check');
     
     if (state.categories.find(cat => cat.name === category).checked) {
         state.categories.find(cat => cat.name === category).checked = false;
@@ -248,6 +253,34 @@ function toggleCategory(e) {
         radio.classList.add('checked');
         radio.appendChild(createCheckIcon());
     }
+
+    updateStateStorage();
+}
+
+function toggleSelectAll() {
+    const radioBtns = document.querySelectorAll('.radio');
+
+    if (state.selectAll) {
+        state.categories.forEach(cat => cat.checked = false);
+        radioBtns.forEach(radio => {
+            if (radio.classList.contains('checked')) {
+                radio.querySelector('i').remove();   
+                radio.classList.remove('checked');
+            }
+        })
+    } else {
+        state.categories.forEach(cat => cat.checked = true);
+        radioBtns.forEach(radio => {
+            if (!radio.classList.contains('checked')) {
+                radio.classList.add('checked');
+                radio.appendChild(createCheckIcon());   
+            }
+        })
+    }
+
+    state.selectAll = !state.selectAll;
+    updateStateStorage();
+
 }
 
 async function loadQuestion(results, index) {
@@ -347,7 +380,7 @@ function loadResults() {
 
 
     div.querySelector('.play-btn').addEventListener('click', () => {
-        playGame(state.difficulty);
+        newGame();
         stopSound('song1');
         playBgSong('song2');
     });
@@ -357,6 +390,11 @@ function loadResults() {
         playBgSong('song1');
         returnToMenu('menu');
     });
+
+    if (state.user.rankUp) {
+        state.user.rankUp = false;
+        updateStateStorage();
+    }
 
     clearUI('menu');
 
@@ -390,6 +428,8 @@ function setTimer(s) {
             }
         }
     }, 1000)
+
+    updateStateStorage();
 }
 
 
@@ -401,6 +441,7 @@ function returnToMenu(type) {
         ++state.qIndex;
         clearInterval(timerInterval);
         stopSound('ticking');
+        updateStateStorage();
     }
 
     return loadMenu();
@@ -451,6 +492,8 @@ async function checkAnswer(e) {
             ++state.qIndex;   
             playSound('incorrect');
         }
+        
+        updateStateStorage();
 
         if (state.qIndex > state.game.totalQ - 1) {
             setTimeout(() => {
@@ -462,7 +505,6 @@ async function checkAnswer(e) {
                 loadQuestion(state.questions, state.qIndex);
             }, 2000)
         }
-        
         
     }
 }
@@ -479,6 +521,8 @@ function addCoins() {
         state.coins += 50;
         state.game.coins += 50;
     }
+
+    updateStateStorage();
     updateUI('status');
 }
 
@@ -514,6 +558,8 @@ function updateRank() {
             updateUI('status');
         }
     }
+
+    updateStateStorage();
 }
 
 function continueGame(questions, index) {
@@ -522,8 +568,8 @@ function continueGame(questions, index) {
 }
 
 
-async function playGame(difficulty, categories) {
-        const quizData = await getQuiz(difficulty, categories);
+async function newGame() {
+        const quizData = await getQuiz();
         
         console.log(quizData);
         state.questions = quizData;
@@ -534,26 +580,50 @@ async function playGame(difficulty, categories) {
         return loadQuestion(state.questions, state.qIndex)
 }
 
-async function getQuiz(difficulty, cat) {
-    let difficulties = `difficulties=${difficulty.join(',')}`;
-    let categories = `categories=${
+async function getQuiz() {
+    let difficulties = `difficulties=${state.difficulty.length ? state.difficulty.join(',') : 'easy,medium,hard'}`;
+    let categories = `&categories=${
         state.categories
             .filter(cat => cat.checked)
             .map(cat => cat.name)
             .join(',')
     }`
 
-    const response = await fetch(state.api_url + difficulties + '&' + categories);
+    if (categories.length === 12) {
+        categories = '';
+    }
+
+    const response = await fetch(state.api_url + difficulties + categories);
     const data = await response.json();
 
     return data;
 }
 
+function getStateFromStorage() {
+    let stateFromStorage;
+
+    if (localStorage.getItem('state') === null) {
+        stateFromStorage = {...state};
+    } { 
+        stateFromStorage = JSON.parse(localStorage.getItem('state'));
+    }
+
+    return stateFromStorage;
+}
+
+function updateStateStorage() {
+    let stateFromStorage = getStateFromStorage();
+
+    stateFromStorage = state;
+    
+    return localStorage.setItem('state', JSON.stringify(stateFromStorage));
+}
+
 function playBgSong(song) {
     const audio = document.getElementById(`${song}`)
-    audio.loop = true;
-    audio.volume = 0.75;
-    audio.play();
+    // audio.loop = true;
+    // audio.volume = 0.75;
+    // audio.play();
 }
 
 function addHoverSound(div) {
@@ -606,6 +676,7 @@ function updateUI(type) {
 }
 
 function init() {
+    state = {...getStateFromStorage()};
     document.addEventListener('DOMContentLoaded', loadStart);
 }
 
