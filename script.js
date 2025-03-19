@@ -621,9 +621,9 @@ function updateStateStorage() {
 
 function playBgSong(song) {
     const audio = document.getElementById(`${song}`)
-    // audio.loop = true;
-    // audio.volume = 0.75;
-    // audio.play();
+    audio.loop = true;
+    audio.volume = 0.75;
+    audio.play();
 }
 
 function addHoverSound(div) {
