@@ -736,7 +736,7 @@ body {
 
   .status.level p {
     margin: 0;
-    font-size: 1rem;
+    font-size: .8rem;
   }
 
   .game-title {
@@ -857,7 +857,7 @@ body {
   }
   
   .stats-box.rank p {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
   }
 
 
