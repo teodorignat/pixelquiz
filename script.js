@@ -1,11 +1,15 @@
 // Variables
 
 const gameContainer = document.getElementById('game-container');
+const root = document.querySelector(':root');
+
+
 let timeoutId;
 let timerInterval;
 
 
 // State
+
 let state = {
     api_url: 'https://the-trivia-api.com/v2/questions?',
     difficulty: ['easy', 'medium', 'hard'],
@@ -26,7 +30,17 @@ let state = {
         {name: "general_knowledge", checked: true}
     ],
     rankLevel: [
-        'Brain Sprout', 'Info Collector', 'Mind Sculptor', 'Truth Hunter', 'Wisdom Seeker', 'Knowledge Master', 'Quiz Genius','Master of Minds'],
+        {name: 'Brain Sprout', bgPath: 'img/pixelbg.png'},
+        {name: 'Info Collector', bgPath: 'img/pixelbg2.jpg'},
+        {name: 'Mind Sculptor', bgPath: 'img/pixelbg3.jpg'},
+        {name: 'Knowledge Seeker', bgPath: 'img/pixelbg4.jpg'},
+        {name: 'Truth Hunter', bgPath: 'img/pixelbg5.jpg'},
+        {name: 'Quiz Master', bgPath: 'img/pixelbg6.jpg'},
+        {name: 'Wisdom Seeker', bgPath: 'img/pixelbg7.jpg'},
+        {name: 'Quiz Genius', bgPath: 'img/pixelbg8.jpg'},
+        {name: 'Knowledge Master', bgPath: 'img/pixelbg9.jpg'},
+        {name: 'Master of Minds', bgPath: 'img/pixelbg10.jpg'},
+    ],
     user: {
         rankIndex: 0,
         rankUp: false,
@@ -41,6 +55,8 @@ let state = {
         coins: 0
     }
 }
+
+ // Functions
 
 function loadStart() {
     const div = document.createElement('div');
@@ -75,7 +91,7 @@ function loadUI() {
                 <div class="status level pixel-corners">
                     <i class="fa-solid fa-trophy"></i>
                     <p class="index">${state.user.rankIndex + 1}</p>
-                    <p class="rank-level">${state.rankLevel[state.user.rankIndex]}</p>
+                    <p class="rank-level">${state.rankLevel[state.user.rankIndex].name}</p>
                 </div>
             </div>`;
 
@@ -342,7 +358,7 @@ function loadResults() {
                 <div class="game-stats pixel-corners">
                     <div class="stats-box rank ${state.user.rankUp? 'rank-up' : ''} pixel-corners">
                         <h2>${state.user.rankUp ? 'Rank UP' : 'Rank' }</h2>
-                        <p>${state.rankLevel[state.user.rankIndex]}</p>
+                        <p>${state.rankLevel[state.user.rankIndex].name}</p>
                     </div>
                     <div class="stats-box">
                         <h2>CORRECT</h2>
@@ -527,7 +543,7 @@ function addCoins() {
 }
 
 function updateRank() {
-    if (state.game.correctA >= 3) {
+    if (state.game.correctA >= 7) {
         ++state.user.consecutiveWins;
         state.user.consecutiveLosses = 0;
         state.user.gameHistory.push('W');
@@ -540,6 +556,7 @@ function updateRank() {
             state.user.rankIndex++;
             state.user.consecutiveWins = 0;
             state.user.rankUp = true;
+            setBackGround(state.rankLevel[state.user.rankIndex].bgPath);
             updateUI('status');
         }
         
@@ -551,15 +568,22 @@ function updateRank() {
         if (state.user.gameHistory.length > 3) {
             state.user.gameHistory.shift();
         }
-
+        
         if (state.user.consecutiveLosses === 3 && state.user.rankIndex > 0) {
             state.user.rankIndex--;
             state.user.consecutiveLosses = 0;
+            setBackGround(state.rankLevel[state.user.rankIndex].bgPath);
             updateUI('status');
         }
     }
 
     updateStateStorage();
+}
+
+function setBackGround(path) {
+    const gameContainer = document.getElementById('game-container');
+
+    return gameContainer.style.backgroundImage = `url(${path})`;
 }
 
 function continueGame(questions, index) {
@@ -604,7 +628,7 @@ function getStateFromStorage() {
 
     if (localStorage.getItem('state') === null) {
         stateFromStorage = {...state};
-    } { 
+    } else { 
         stateFromStorage = JSON.parse(localStorage.getItem('state'));
     }
 
@@ -665,7 +689,7 @@ function updateUI(type) {
         const rankIndex = userUI.querySelector('.status.level .index');
     
         coins.textContent = state.coins;
-        rank.textContent = state.rankLevel[state.user.rankIndex];
+        rank.textContent = state.rankLevel[state.user.rankIndex].name;
         rankIndex.textContent = state.user.rankIndex + 1;
     } else {
         const score = gameContainer.querySelector('.score p');
@@ -677,6 +701,8 @@ function updateUI(type) {
 
 function init() {
     state = {...getStateFromStorage()};
+    setBackGround(state.rankLevel[state.user.rankIndex].bgPath);
+
     document.addEventListener('DOMContentLoaded', loadStart);
 }
 
