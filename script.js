@@ -404,6 +404,12 @@ function loadResults() {
     });
 
     div.querySelector('.return-btn').addEventListener('click', () => {
+        if (!rankup.paused) {
+            stopSound('rankup');
+        } else if (!rankdown.paused) {
+            stopSound('rankdown');
+        }
+
         stopSound('gamesong');
         playBgSong('bgsong');
         returnToMenu('menu');
