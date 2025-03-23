@@ -739,6 +739,10 @@ body {
     font-size: 1rem;
   }
 
+  .status.level .index {
+    font-size: 1rem;
+  }
+
   .game-title {
     padding : 1.5em;
     font-size: .6em;
@@ -857,7 +861,7 @@ body {
   }
   
   .stats-box.rank p {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
   }
 
 
