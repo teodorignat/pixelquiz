@@ -42,7 +42,7 @@ let state = {
         {name: 'Master of Minds', bgPath: 'img/pixelbg10.jpg'},
     ],
     user: {
-        rankIndex: 0,
+        rankIndex: 5,
         rankUp: false,
         consecutiveWins: 0,
         consecutiveLosses: 0,
@@ -69,7 +69,7 @@ function loadStart() {
             </div>`;
 
     div.querySelector('.start-btn').addEventListener('click', () => {
-        playBgSong('song1');
+        playBgSong('bgsong');
         playSound('effect');
         loadUI();
         loadMenu();
@@ -120,8 +120,8 @@ function loadMenu() {
 
     div.querySelector('.play-btn').addEventListener('click', () => {
         newGame();
-        stopSound('song1');
-        playBgSong('song2');
+        stopSound('bgsong');
+        playBgSong('gamesong');
     });
 
     div.querySelector('.diff-btn').addEventListener('click', loadDifficulties);
@@ -130,8 +130,8 @@ function loadMenu() {
     if (state.questions.length && state.qIndex <= state.game.totalQ -1) {
         div.querySelector('.continue-btn').addEventListener('click', () => {
             continueGame(state.questions, state.qIndex);
-            stopSound('song1');
-            playBgSong('song2');
+            stopSound('bgsong');
+            playBgSong('gamesong');
         });
     }
 
@@ -334,8 +334,8 @@ async function loadQuestion(results, index) {
     <button class="btn return-btn pixel-corners">Return to menu</button>`;
     
     div.querySelector('.return-btn').addEventListener('click', () => {
-        stopSound('song2');
-        playBgSong('song1');
+        stopSound('gamesong');
+        playBgSong('bgsong');
         returnToMenu('game');
     });
     div.querySelector('.controls').addEventListener('click', checkAnswer);
@@ -397,13 +397,13 @@ function loadResults() {
 
     div.querySelector('.play-btn').addEventListener('click', () => {
         newGame();
-        stopSound('song1');
-        playBgSong('song2');
+        stopSound('bgsong');
+        playBgSong('gamesong');
     });
 
     div.querySelector('.return-btn').addEventListener('click', () => {
-        stopSound('song2');
-        playBgSong('song1');
+        stopSound('gamesong');
+        playBgSong('bgsong');
         returnToMenu('menu');
     });
 
@@ -646,7 +646,7 @@ function updateStateStorage() {
 function playBgSong(song) {
     const audio = document.getElementById(`${song}`)
     audio.loop = true;
-    audio.volume = 0.75;
+    audio.volume = 0.55;
     audio.play();
 }
 
