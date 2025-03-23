@@ -6,6 +6,7 @@ const root = document.querySelector(':root');
 
 let timeoutId;
 let timerInterval;
+let lastSoundOn;
 
 
 // State
@@ -17,6 +18,7 @@ let state = {
     questions: [],
     qIndex: 0,
     selectAll: true,
+    playingOnHide: false,
     categories: [
         {name:"music", checked: true}, 
         {name: "sport_and_leisure", checked: true},
@@ -42,7 +44,7 @@ let state = {
         {name: 'Master of Minds', bgPath: 'img/pixelbg10.jpg'},
     ],
     user: {
-        rankIndex: 5,
+        rankIndex: 0,
         rankUp: false,
         consecutiveWins: 0,
         consecutiveLosses: 0,
@@ -557,6 +559,7 @@ function updateRank() {
             state.user.consecutiveWins = 0;
             state.user.rankUp = true;
             setBackGround(state.rankLevel[state.user.rankIndex].bgPath);
+            playSound('rankup');
             updateUI('status');
         }
         
@@ -573,6 +576,7 @@ function updateRank() {
             state.user.rankIndex--;
             state.user.consecutiveLosses = 0;
             setBackGround(state.rankLevel[state.user.rankIndex].bgPath);
+            playSound('rankdown');
             updateUI('status');
         }
     }
@@ -675,6 +679,29 @@ function stopSound(sound) {
     audio.currentTime = 0;
 }
 
+function pageVisibilityChange() {
+
+    if (document.hidden) {
+        state.playingOnHide = !bgsong.paused ? !bgsong.paused : !gamesong.paused;
+        
+        if (!gamesong.paused) { 
+            stopSound('gamesong')
+            lastSoundOn = 'gamesong';
+        } else {
+            stopSound('bgsong')
+            lastSoundOn = 'bgsong';
+        }
+    } else {
+        if (state.playingOnHide) {
+            if (lastSoundOn === 'gamesong') {
+                playBgSong('gamesong');
+            } else {
+                playBgSong('bgsong');
+            }
+        }
+    }
+}
+
 function clearUI(type) {
     if (type === 'menu') {
         gameContainer.querySelector('.game-menu').remove();
@@ -703,6 +730,7 @@ function init() {
     state = {...getStateFromStorage()};
     setBackGround(state.rankLevel[state.user.rankIndex].bgPath);
 
+    document.addEventListener('visibilitychange', pageVisibilityChange);
     document.addEventListener('DOMContentLoaded', loadStart);
 }
 
